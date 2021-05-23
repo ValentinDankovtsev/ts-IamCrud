@@ -1,0 +1,65 @@
+{
+  "name": "crud",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "prettier --check . && eslint . --ext .js,.ts && tsc --noEmit",
+    "lint:fix": "prettier --write . && eslint . --fix --ext .js,.ts",
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ValentinDankovtsev@github.com/ValentinDankovtsev/ts-I-amCRUD.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ValentinDankovtsev/ts-I-amCRUD/issues"
+  },
+  "homepage": "https://github.com/ValentinDankovtsev/ts-I-amCRUD#readme",
+  "devDependencies": {
+    "@babel/core": "^7.12.17",
+    "@babel/plugin-transform-runtime": "^7.12.17",
+    "@babel/preset-env": "^7.12.17",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^26.0.20",
+    "@typescript-eslint/eslint-plugin": "^4.15.2",
+    "@typescript-eslint/parser": "^4.15.2",
+    "babel-jest": "^26.6.3",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^5.2.4",
+    "eslint": "^7.20.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.5",
+    "eslint-plugin-jsdoc": "^32.0.2",
+    "html-webpack-plugin": "^5.1.0",
+    "husky": "^4.3.8",
+    "jest": "^26.6.3",
+    "jsdoc": "^3.6.6",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1",
+    "style-loader": "^2.0.0",
+    "typescript": "^4.1.5",
+    "webpack": "^5.23.0",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {},
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js,*.ts": [
+      "prettier --write",
+      "eslint --cache --fix --ext .js,.ts"
+    ],
+    "*.{css,md}": "prettier --write"
+  },
+  "description": "[![PR Sanity Check](https://github.com/ValentinDankovtsev/js-ts--gameOfLife/actions/workflows/sanity-check.yml/badge.svg)](https://github.com/ValentinDankovtsev/js-ts--gameOfLife/actions/workflows/sanity-check.yml)"
+}
