@@ -1,76 +1,109 @@
+import { v4 as uuidv4 } from "uuid";
+
 export type Task = {
-  date: Date;
+  date: string;
   text: string;
   status: "wait" | "process" | "done";
   tag: "low" | "middle" | "high";
-  id?: number;
+  id?: number | string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
 
 export interface ICrudCalendar {
-  tasks: Task["id"][];
+  tasksId: Task["id"][] | string[];
   create(newTask: Task): Promise<Task[]>;
   read(id: Task["id"]): Promise<Task>;
-  update(id: Task["id"], updateTask: Partial<Task>): Promise<Task>;
+  update(id: Task["id"], updateTask: Task): Promise<Task>;
   delete(id: Task["id"]): Promise<void>;
 }
 
-export class CrudCalendar implements ICrudCalendar {
-  tasks: Task["id"][] = [];
+export namespace LocalStorage {
+  export class CrudCalendar implements ICrudCalendar {
+    tasksId: Task["id"][] = [];
 
-  constructor() {
-    localStorage.setItem("crudCalendar", JSON.stringify([]));
-  }
+    private storage: Task[] = [];
 
-  public async create(newTask: Task): Promise<Task[]> {
-    const storage = JSON.parse(localStorage.getItem("crudCalendar") as string);
-    storage.push(await this.createTask(newTask));
-    this.tasks.push(storage[storage.length - 1].id);
-    localStorage.setItem("crudCalendar", JSON.stringify(storage));
-    return storage;
-  }
+    private random: Task["id"];
 
-  // eslint-disable-next-line class-methods-use-this
-  public async read(id: Task["id"]): Promise<Task> {
-    const storage = JSON.parse(localStorage.getItem("crudCalendar") as any);
-    return storage.find((item: Task) => item.id === id);
-  }
-
-  public async update(
-    id: Task["id"],
-    updateTask: Partial<Task>
-  ): Promise<Task> {
-    const newTask = await this.read(id);
-    // eslint-disable-next-line no-restricted-syntax
-    for (const key in newTask) {
-      if (updateTask[key]) {
-        newTask[key] = updateTask[key];
+    constructor() {
+      if (localStorage.getItem("crudCalendar") !== undefined) {
+        this.storage = [];
+        localStorage.setItem("crudCalendar", JSON.stringify(this.storage));
       }
+      this.random = "";
     }
 
-    const storage = JSON.parse(localStorage.getItem("crudCalendar") as string);
-    const newStorage = storage.map((item: Task) =>
-      item.id === id ? newTask : item
-    );
-    localStorage.setItem("crudCalendar", JSON.stringify(newStorage));
-    return newTask;
-  }
+    public async create(newTask: Task): Promise<Task[]> {
+      this.storage.push(await this.createTask(newTask));
+      this.tasksId.push(this.storage[this.storage.length - 1].id);
+      localStorage.setItem("crudCalendar", JSON.stringify(this.storage));
+      return this.storage;
+    }
 
-  // eslint-disable-next-line class-methods-use-this
-  public async delete(id: Task["id"]): Promise<void> {
-    const storage = JSON.parse(localStorage.getItem("crudCalendar") as string);
-    const newStorage = storage.filter((item: Task) => item.id !== id);
-    localStorage.setItem("crudCalendar", JSON.stringify(newStorage));
-    const newTasks = this.tasks.filter((item: Task["id"]) => item !== id);
-    this.tasks = newTasks;
-  }
+    public async read(id: Task["id"]): Promise<Task> {
+      const result = [];
+      for (let i = 0; i < this.storage.length; i++) {
+        if (this.storage[i].id === id) {
+          result.push(this.storage[i]);
+        }
+      }
+      return result[0];
+    }
 
-  // eslint-disable-next-line class-methods-use-this
-  async createTask(task: Task): Promise<Task> {
-    const random = Math.floor(Math.random() * (10 - 1 + 1)) + 1;
-    const newTask = task;
-    newTask.id = random;
-    return newTask;
+    public async update(
+      id: Task["id"],
+      updateTask: Partial<Task>
+    ): Promise<Task> {
+      const newTask = await this.read(id);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key in newTask) {
+        if (updateTask[key]) {
+          newTask[key] = updateTask[key];
+        }
+      }
+
+      const storage = JSON.parse(
+        localStorage.getItem("crudCalendar") as string
+      );
+      const newStorage = storage.map((item: Task) =>
+        item.id === id ? newTask : item
+      );
+      localStorage.setItem("crudCalendar", JSON.stringify(newStorage));
+      return newTask;
+    }
+
+    public async delete(id: Task["id"]): Promise<void> {
+      const newStorage = this.storage.filter((item: Task) => item.id !== id);
+      localStorage.setItem("crudCalendar", JSON.stringify(newStorage));
+      const newTasks = this.tasksId.filter((item: Task["id"]) => item !== id);
+      this.tasksId = newTasks;
+    }
+
+    public async createTask(task: Task): Promise<Task> {
+      this.random = uuidv4();
+      const newTask = task;
+      newTask.id = this.random;
+      return newTask;
+    }
+
+    public async filterDate(filtredDate: Date): Promise<Task[]> {
+      return this.storage.filter(
+        (item: Task) =>
+          JSON.stringify(item.date) === JSON.stringify(filtredDate.toString())
+      );
+    }
+
+    public async filterText(text: Task["text"]): Promise<Task[]> {
+      return this.storage.filter((item: Task) => item.text === text);
+    }
+
+    public async filterTag(tag: Task["tag"]): Promise<Task[]> {
+      return this.storage.filter((item: Task) => item.tag === tag);
+    }
+
+    public async filterStatus(status: Task["status"]): Promise<Task[]> {
+      return this.storage.filter((item: Task) => item.status === status);
+    }
   }
 }
